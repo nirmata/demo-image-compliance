@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/kyverno/image-verification-service/pkg/certmanager"
-	"github.com/kyverno/image-verification-service/pkg/policy"
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
 	tlsMgr "github.com/kyverno/pkg/tls"
+	"github.com/nirmata/image-verification-service/pkg/certmanager"
+	"github.com/nirmata/image-verification-service/pkg/policy"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/client-go/informers/core/v1"
 )

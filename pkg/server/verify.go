@@ -7,10 +7,11 @@ import (
 	"net/http"
 
 	"github.com/go-logr/logr"
-	"github.com/kyverno/image-verification-service/pkg/api"
-	"github.com/kyverno/image-verification-service/pkg/policy"
 	eval "github.com/kyverno/kyverno/pkg/imageverification/evaluator"
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
+	"github.com/nirmata/image-verification-service/pkg/api"
+	"github.com/nirmata/image-verification-service/pkg/policy"
+	"github.com/pkg/errors"
 )
 
 func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts ...imagedataloader.Option) func(w http.ResponseWriter, r *http.Request) {
@@ -20,13 +21,14 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts 
 			return
 		}
 
+		policyFetcher = policy.MockPolicyFetcher
 		var requestData api.RequestData
 		raw, _ := io.ReadAll(r.Body)
 
 		err := json.Unmarshal(raw, &requestData)
 		if err != nil {
 			logger.Info("failed to decode", "data", string(raw), "error", err)
-			http.Error(w, err.Error(), http.StatusNotAcceptable)
+			http.Error(w, errors.Wrapf(err, "failed to decode").Error(), http.StatusNotAcceptable)
 			return
 		}
 		logger.Info("Request recieved", "data", requestData)
@@ -34,21 +36,21 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts 
 		policies, err := policyFetcher()
 		if err != nil {
 			logger.Info("failed to fetch policies", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, errors.Wrapf(err, "failed to fetch policies").Error(), http.StatusInternalServerError)
 			return
 		}
 
 		result, err := eval.Evaluate(context.Background(), logger, policies, requestData, nil, nil, nil)
 		if err != nil {
 			logger.Info("failed to evaluate request", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, errors.Wrapf(err, "failed to evaluate request").Error(), http.StatusInternalServerError)
 			return
 		}
 
 		data, err := json.Marshal(result)
 		if err != nil {
 			logger.Info("failed to decode result", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, errors.Wrapf(err, "failed to decode result").Error(), http.StatusInternalServerError)
 			return
 		}
 

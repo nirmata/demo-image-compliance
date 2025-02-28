@@ -1,4 +1,4 @@
-module github.com/kyverno/image-verification-service
+module github.com/nirmata/image-verification-service
 
 go 1.23.4
 

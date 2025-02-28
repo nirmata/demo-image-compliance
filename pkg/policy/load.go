@@ -6,12 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kyverno/image-verification-service/pkg/data"
 	policiesv1alpha1 "github.com/kyverno/kyverno/api/policies.kyverno.io/v1alpha1"
 	fileinfo "github.com/kyverno/pkg/ext/file-info"
 	"github.com/kyverno/pkg/ext/resource/convert"
 	"github.com/kyverno/pkg/ext/resource/loader"
 	yamlutils "github.com/kyverno/pkg/ext/yaml"
+	"github.com/nirmata/image-verification-service/pkg/data"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/kubectl-validate/pkg/openapiclient"
 )

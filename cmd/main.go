@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyverno/image-verification-service/pkg/certmanager"
-	"github.com/kyverno/image-verification-service/pkg/server"
 	policiesv1alpha1 "github.com/kyverno/kyverno/api/policies.kyverno.io/v1alpha1"
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
 	tlsMgr "github.com/kyverno/pkg/tls"
+	"github.com/nirmata/image-verification-service/pkg/certmanager"
+	"github.com/nirmata/image-verification-service/pkg/server"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/client-go/kubernetes"
