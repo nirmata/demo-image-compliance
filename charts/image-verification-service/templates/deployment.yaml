@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "kyverno-image-verification-service.name" . }}
+  namespace: {{ template "kyverno-image-verification-service.namespace" . }}
+  labels:
+    {{- include "kyverno-image-verification-service.labels" . | nindent 4 }}
+spec:
+  progressDeadlineSeconds: 600
+  revisionHistoryLimit: 10
+  replicas: {{ .Values.deployment.imagePullSecrets | default 1 }}
+  {{- with .Values.deployment.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kyverno-image-verification-service.matchLabels.common" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kyverno-image-verification-service.labels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: {{ template "kyverno-image-verification-service.serviceAccountName" . }}
+      containers:
+      - image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name: kyverno-image-verification-service
+        args:
+          - --leader-elect={{ .Values.deployment.enableLeaderElection | default false }}
+          - --notls={{ .Values.deployment.disableHTTPS | default false }}
+          - --allowInsecureRegistry={{ .Values.deployment.allowInsecureRegistry | default false }}
+          {{- if .Values.deployment.imagePullSecrets }}
+          - --imagePullSecrets={{ keys .Values.deployment.imagePullSecrets | join "," }}
+          {{- end }}
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            memory: 32Mi
+            cpu: 100m
+        securityContext:
+          runAsUser: 2000
+          runAsGroup: 3000
+          allowPrivilegeEscalation: false
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+              - ALL
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace  
+        - name: SERVICE_NAME
+          value: {{ template "kyverno-image-verification-service.serviceName" . }}
+        - name: DEPLOYMENT_NAME
+          value: {{ template "kyverno-image-verification-service.name" . }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        {{- with .Values.volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

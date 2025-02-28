@@ -1,0 +1,84 @@
+# -- (string) Override the name of the chart
+nameOverride: ~
+
+# -- (string) Override the expanded name of the chart
+fullnameOverride: ~
+
+# -- (string) Override the namespace the chart deploys to
+namespaceOverride: ~
+
+image:
+  # -- (string) Image registry
+  registry: ghcr.io
+  # -- (string) Image repository
+  repository: nirmata/image-verification-service
+  # -- (string) Image tag
+  # Defaults to appVersion in Chart.yaml if omitted
+  tag: ~
+  # -- (string) Image pull policy
+  pullPolicy: IfNotPresent
+
+# Deployment configuration
+deployment:
+  # -- Deployment update strategy.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  # @default -- See [values.yaml](values.yaml)
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+
+  # -- Replicas defines the number of pod created for the deployment
+  replicas: 1
+
+  # -- Image pull secrets, this will define the `--imagePullSecrets` argument
+  imagePullSecrets: {}
+  # regcred:
+  #   registry: foo.example.com
+  #   username: foobar
+  #   password: secret
+  # regcred2:
+  #   registry: bar.example.com
+  #   username: barbaz
+  #   password: secret2
+
+  # -- Allow insecure registry specifies whether to allow insecure connections to registries. Not recommended.
+  allowInsecureRegistry: false
+
+  # -- Disable HTTPS disables TLS for server. Not recommended.
+  disableHTTPS: false
+
+  # -- Enable Leader Election enable leader election for cert management. Use when the pod has multiple replicas.
+  enableLeaderElection: false
+
+# Service account configuration
+serviceAccount:
+  # -- The ServiceAccount name
+  name:
+
+  # -- Annotations for the ServiceAccount
+  annotations: {}
+
+# nodeSelector for Deployment. More details:
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+# tolerations for Deployment. More details:
+# https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+tolerations: []
+
+# affinity for Deployment. More details:
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+# volumes for Deployment.
+volumes:
+  - name: policies
+    image:
+      reference: ghcr.io/vishal-chdhry/ivpol:latest
+
+# volume mounts for Deployment.
+volumeMounts:
+  - name: policies
+    mountPath: /policies

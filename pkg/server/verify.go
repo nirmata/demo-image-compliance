@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/kyverno/image-verification-service/pkg/api"
 	"github.com/kyverno/image-verification-service/pkg/policy"
+	eval "github.com/kyverno/kyverno/pkg/imageverification/evaluator"
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
 )
 
@@ -29,8 +31,6 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts 
 		}
 		logger.Info("Request recieved", "data", requestData)
 
-		var data []byte
-
 		policies, err := policyFetcher()
 		if err != nil {
 			logger.Info("failed to fetch policies", "error", err)
@@ -38,8 +38,19 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts 
 			return
 		}
 
-		policies = policies
-		// image verify
+		result, err := eval.Evaluate(context.Background(), logger, policies, requestData, nil, nil, nil)
+		if err != nil {
+			logger.Info("failed to evaluate request", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		data, err := json.Marshal(result)
+		if err != nil {
+			logger.Info("failed to decode result", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		logger.Info("Sending response", "data", string(data))
 		w.WriteHeader(http.StatusOK)

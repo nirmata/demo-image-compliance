@@ -1,0 +1,4 @@
+Chart Version: {{ .Chart.Version }}
+Image Verification Service Version: {{ .Chart.AppVersion }}
+
+Thank you for installing {{ .Chart.Name }}! Your release is named {{ .Release.Name }}.

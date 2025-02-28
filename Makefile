@@ -4,7 +4,7 @@
 # CONFIG #
 ##########
 
-ORG                                ?= kyverno
+ORG                                ?= nirmata
 PACKAGE                            ?= github.com/$(ORG)/image-verification-service
 KIND_IMAGE                         ?= kindest/node:v1.32.0
 KIND_NAME                          ?= kind
@@ -12,7 +12,7 @@ GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
-REPO                               ?= image-verification-service
+REPO                               ?= $(ORG)/image-verification-service
 LOCAL_PLATFORM                     := linux/$(GOARCH)
 KO_REGISTRY                        := ko.local
 KO_PLATFORMS                       := all
@@ -28,12 +28,14 @@ TOOLS_DIR                          := $(PWD)/.tools
 REFERENCE_DOCS                     := $(TOOLS_DIR)/genref
 REFERENCE_DOCS_VERSION             := latest
 KIND                               := $(TOOLS_DIR)/kind
-KIND_VERSION                       := v0.20.0
+KIND_VERSION                       := v0.23.0
 HELM                               := $(TOOLS_DIR)/helm
-HELM_VERSION                       := v3.10.1
+HELM_VERSION                       := v3.12.3
+HELM_DOCS                          ?= $(TOOLS_DIR)/helm-docs
+HELM_DOCS_VERSION                  ?= v1.11.0
 KO                                 := $(TOOLS_DIR)/ko
-KO_VERSION                         := v0.14.1
-TOOLS                              := $(REFERENCE_DOCS) $(KIND) $(HELM) $(KO)
+KO_VERSION                         := v0.17.1
+TOOLS                              := $(KIND) $(HELM) $(HELM_DOCS) $(KO)
 PIP                                ?= pip
 ifeq ($(GOOS), darwin)
 SED                                := gsed
@@ -41,6 +43,22 @@ else
 SED                                := sed
 endif
 COMMA                              := ,
+
+$(KIND):
+	@echo Install kind... >&2
+	@GOBIN=$(TOOLS_DIR) go install sigs.k8s.io/kind@$(KIND_VERSION)
+
+$(HELM):
+	@echo Install helm... >&2
+	@GOBIN=$(TOOLS_DIR) go install helm.sh/helm/v3/cmd/helm@$(HELM_VERSION)
+
+$(HELM_DOCS):
+	@echo Install helm-docs... >&2
+	@GOBIN=$(TOOLS_DIR) go install github.com/norwoodj/helm-docs/cmd/helm-docs@$(HELM_DOCS_VERSION)
+
+$(KO):
+	@echo Install ko... >&2
+	@GOBIN=$(TOOLS_DIR) go install github.com/google/ko@$(KO_VERSION)
 
 .PHONY: install-tools
 install-tools: $(TOOLS) ## Install tools
@@ -60,11 +78,33 @@ vet: ## Run go vet
 	@echo Go vet... >&2
 	@go vet ./...
 
-.PHONY: ko-build
+.PHONY: test-all
+test-all: test-clean test-unit ## Clean tests cache then run unit tests
+
+.PHONY: test-clean
+test-clean: ## Clean tests cache
+	@echo Clean test cache... >&2
+	@go clean -testcache
+
+.PHONY: test-unit
+test-unit: ## Run tests
+	@echo Running tests... >&2
+	@go test ./... -race -coverprofile=coverage.out -covermode=atomic#########
+
+# BUILD #
+#########
+
+LOCAL_PLATFORM      := linux/$(GOARCH)
+KO_DOCKER_REPO ?= ko.local
+
+..PHONY: ko-build
 ko-build: $(KO) ## Build image (with ko)
 	@echo Build image with ko... >&2
-	@LDFLAGS=$(LD_FLAGS) KOCACHE=$(KO_CACHE) KO_DOCKER_REPO=$(KO_REGISTRY) \
-		$(KO) build . --preserve-import-paths --tags=$(KO_TAGS) --platform=$(LOCAL_PLATFORM)
+	KO_DOCKER_REPO=$(KO_DOCKER_REPO) $(KO) build --preserve-import-paths --tags=$(GIT_SHA) --platform=$(LOCAL_PLATFORM) ./cmd
+	
+.PHONY: ko-publish
+ko-publish: ko ## Build and publish the admission controller container image.
+	KO_DOCKER_REPO=$(KO_DOCKER_REPO) $(KO) build --bare cmd/main.go
 
 ###########
 # CODEGEN #
@@ -84,29 +124,19 @@ codegen-policies:
 	docker build -t $(REGISTRY)/vishal-chdhry/ivpol:latest -f ./policies/Dockerfile ./policies
 	docker push $(REGISTRY)/vishal-chdhry/ivpol:latest
 
-.PHONY: codegen-helm-crds
-codegen-helm-crds: codegen-crds ## Generate helm CRDs
-	@echo Generate helm crds... >&2
-	@cat $(CRDS_PATH)/* \
-		| $(SED) -e '1i{{- if .Values.crds.install }}' \
-		| $(SED) -e '$$a{{- end }}' \
-		| $(SED) -e '/^  annotations:/a \ \ \ \ {{- end }}' \
- 		| $(SED) -e '/^  annotations:/a \ \ \ \ {{- toYaml . | nindent 4 }}' \
-		| $(SED) -e '/^  annotations:/a \ \ \ \ {{- with .Values.crds.annotations }}' \
- 		| $(SED) -e '/^  annotations:/i \ \ labels:' \
-		| $(SED) -e '/^  labels:/a \ \ \ \ {{- end }}' \
- 		| $(SED) -e '/^  labels:/a \ \ \ \ {{- toYaml . | nindent 4 }}' \
-		| $(SED) -e '/^  labels:/a \ \ \ \ {{- with .Values.crds.labels }}' \
-		| $(SED) -e '/^  labels:/a \ \ \ \ {{- include "kyverno-json.labels" . | nindent 4 }}' \
- 		> ./charts/kyverno-json/templates/crds.yaml
-
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2
 	@docker run -v ${PWD}/charts:/work -w /work jnorwood/helm-docs:v1.11.0 -s file
 
+.PHONY: codegen-manifest-install
+codegen-manifest-install: ## Generate install manifest
+	$(HELM) template kyverno-image-verification-service --namespace kyverno-image-verification-service charts/image-verification-service \
+	--set image.tag=latest \
+	> config/install.yaml
+
 .PHONY: codegen
-codegen: codegen-crds codegen-helm-crds codegen-helm-docs ## Rebuild all generated code and docs
+codegen: codegen-crds codegen-helm-docs codegen-manifest-install ## Rebuild all generated code and docs
 
 .PHONY: verify-codegen
 verify-codegen: codegen ## Verify all generated code and docs are up to date
@@ -133,14 +163,15 @@ kind-delete: $(KIND) ## Delete kind cluster
 .PHONY: kind-load
 kind-load: $(KIND) ko-build ## Build image and load in kind cluster
 	@echo Load image... >&2
-	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_REGISTRY)/$(PACKAGE):$(GIT_SHA)
+	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_DOCKER_REPO)/$(PACKAGE)/cmd:$(GIT_SHA)
 
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
-	@$(HELM) upgrade --install image-verification-service --namespace kyverno-image-verification-service --create-namespace --wait ./charts/ \
-		--set image.registry=$(KO_REGISTRY) \
-		--set image.repository=$(PACKAGE) \
+	@$(HELM) upgrade --install kyverno-image-verification-service --namespace kyverno-image-verification-service \
+		--create-namespace --wait ./charts/image-verification-service \
+		--set image.registry=$(KO_DOCKER_REPO) \
+		--set image.repository=$(PACKAGE)/cmd \
 		--set image.tag=$(GIT_SHA)
 
 ########
