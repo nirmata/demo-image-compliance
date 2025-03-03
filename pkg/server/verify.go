@@ -12,16 +12,16 @@ import (
 	"github.com/nirmata/image-verification-service/pkg/api"
 	"github.com/nirmata/image-verification-service/pkg/policy"
 	"github.com/pkg/errors"
+	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts ...imagedataloader.Option) func(w http.ResponseWriter, r *http.Request) {
+func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, lister k8scorev1.SecretInterface, opts ...imagedataloader.Option) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 
-		policyFetcher = policy.MockPolicyFetcher
 		var requestData api.RequestData
 		raw, _ := io.ReadAll(r.Body)
 
@@ -40,7 +40,7 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, opts 
 			return
 		}
 
-		result, err := eval.Evaluate(context.Background(), logger, policies, requestData, nil, nil, nil)
+		result, err := eval.Evaluate(context.Background(), logger, policies, requestData, nil, nil, nil, opts...)
 		if err != nil {
 			logger.Info("failed to evaluate request", "error", err)
 			http.Error(w, errors.Wrapf(err, "failed to evaluate request").Error(), http.StatusInternalServerError)

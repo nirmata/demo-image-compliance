@@ -15,6 +15,7 @@ import (
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
 	tlsMgr "github.com/kyverno/pkg/tls"
 	"github.com/nirmata/image-verification-service/pkg/certmanager"
+	"github.com/nirmata/image-verification-service/pkg/policy"
 	"github.com/nirmata/image-verification-service/pkg/server"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -32,11 +33,13 @@ func main() {
 		flagImagePullSecrets      string
 		flagAllowInsecureRegistry bool
 		enableLeaderElection      bool
+		reconcileDuration         time.Duration
 	)
 
 	flag.BoolVar(&flagTLS, "notls", false, "Disable HTTPS")
 	flag.StringVar(&flagImagePullSecrets, "imagePullSecrets", "", "Secret resource names for image registry access credentials.")
 	flag.BoolVar(&flagAllowInsecureRegistry, "allowInsecureRegistry", false, "Whether to allow insecure connections to registries. Not recommended.")
+	flag.DurationVar(&reconcileDuration, "reconcileDuration", time.Hour, "Frequency of reconciling policy artifact")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -86,7 +89,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	errChan := server.NewServer(logger, flagTLS, tlsInformer, BuildRemoteOpts(strings.Split(flagImagePullSecrets, ","), []string{string(policiesv1alpha1.ACR)}, flagAllowInsecureRegistry)...)
+	secrets := make([]string, 0)
+	if len(flagImagePullSecrets) != 0 {
+		secrets = append(secrets, strings.Split(flagImagePullSecrets, ",")...)
+	}
+	rOpts, nOpts, err := policy.RegistryOpts(
+		kubeClient.CoreV1().Secrets(certmanager.Namespace),
+		flagAllowInsecureRegistry,
+		secrets...,
+	)
+	if err != nil {
+		log.Fatalf("failed to initialize remote options: %v", err)
+		os.Exit(1)
+	}
+
+	fetcher, err := policy.PolicyFetcher(signalCtx, logger, reconcileDuration, rOpts, nOpts)
+	if err != nil {
+		log.Fatalf("failed to initialize policy fetcher: %v", err)
+		os.Exit(1)
+	}
+
+	errChan := server.NewServer(
+		logger,
+		flagTLS,
+		tlsInformer,
+		fetcher,
+		kubeClient.CoreV1().Secrets(certmanager.Namespace),
+		BuildRemoteOpts(secrets, []string{string(policiesv1alpha1.ACR)},
+			flagAllowInsecureRegistry)...,
+	)
 
 	logger.Info("Listening for requests...")
 	select {

@@ -60,6 +60,8 @@ spec:
           value: {{ template "kyverno-image-verification-service.serviceName" . }}
         - name: DEPLOYMENT_NAME
           value: {{ template "kyverno-image-verification-service.name" . }}
+        - name: POLICY_PATH
+          value: {{ .Values.policiesPath | default "/policies" }}
         - name: POD_NAME
           valueFrom:
             fieldRef:

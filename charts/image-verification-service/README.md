@@ -11,6 +11,7 @@ Kyverno image verification service for image verification on any payload
 | nameOverride | string | `nil` | Override the name of the chart |
 | fullnameOverride | string | `nil` | Override the expanded name of the chart |
 | namespaceOverride | string | `nil` | Override the namespace the chart deploys to |
+| policiesPath | string | `"oci://ghcr.io/vishal-chdhry/ivpol:sample"` | Path to image verification policies, can be a directory (ex: /policies) or an artifact (ex: oci://ghcr.io/vishal-chdhry/ivpol:latest ) |
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"nirmata/image-verification-service"` | Image repository |
 | image.tag | string | `nil` | Image tag Defaults to appVersion in Chart.yaml if omitted |

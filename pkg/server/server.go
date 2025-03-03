@@ -13,11 +13,12 @@ import (
 	"github.com/nirmata/image-verification-service/pkg/policy"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/client-go/informers/core/v1"
+	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func NewServer(logger logr.Logger, tlsDisabled bool, tlsInformer v1.SecretInformer, opts ...imagedataloader.Option) chan error {
+func NewServer(logger logr.Logger, tlsDisabled bool, tlsInformer v1.SecretInformer, f policy.Fetcher, lister k8scorev1.SecretInterface, opts ...imagedataloader.Option) chan error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/verifyimages", VerifyImagesHandler(logger, policy.FSPolicyFetcher, opts...))
+	mux.HandleFunc("/verifyimages", VerifyImagesHandler(logger, f, lister, opts...))
 
 	errsTLS := make(chan error, 1)
 	if !tlsDisabled {
