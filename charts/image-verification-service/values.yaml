@@ -7,6 +7,9 @@ fullnameOverride: ~
 # -- (string) Override the namespace the chart deploys to
 namespaceOverride: ~
 
+# -- (string) Path to image verification policies, can be a directory (ex: /policies) or an artifact (ex: oci://ghcr.io/vishal-chdhry/ivpol:latest )
+policiesPath: oci://ghcr.io/vishal-chdhry/ivpol:sample
+
 image:
   # -- (string) Image registry
   registry: ghcr.io

@@ -1,5 +1,1 @@
-{
-  "foo": {
-    "bar": "ghcr.io/kyverno/test-verify-image:signed"
-  }
-}
+{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}

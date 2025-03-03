@@ -1,4 +1,4 @@
 FROM scratch
 
 WORKDIR /
-COPY .*.yaml ./
+COPY ./*.yaml ./
