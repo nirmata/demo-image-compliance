@@ -8,7 +8,7 @@ fullnameOverride: ~
 namespaceOverride: ~
 
 # -- (string) Path to image verification policies, can be a directory (ex: /policies) or an artifact (ex: oci://ghcr.io/vishal-chdhry/ivpol:latest )
-policiesPath: oci://ghcr.io/vishal-chdhry/ivpol:sample
+policiesPath: oci://ghcr.io/vishal-chdhry/ivpol:crit-vuln
 
 image:
   # -- (string) Image registry

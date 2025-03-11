@@ -33,3 +33,22 @@ Post a request with unsigned image
 ```sh
 curl -k https://kyverno-image-verification-service-svc.kyverno-image-verification-service/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:unsigned"}}'
 ```
+
+Update `POLICY_PATH` environment variable in deployment to: 
+
+```sh
+kubectl -n kyverno-image-verification-service edit deploy kyverno-image-verification-service
+```
+
+```
+- name: POLICY_PATH
+  value: oci://ghcr.io/vishal-chdhry/ivpol:high-crit-vuln
+```
+
+Post a request with signed image
+
+```sh
+curl -k https://kyverno-image-verification-service-svc.kyverno-image-verification-service/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}'
+```
+
+This should fail now

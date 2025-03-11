@@ -151,7 +151,7 @@ spec:
         - name: DEPLOYMENT_NAME
           value: kyverno-image-verification-service
         - name: POLICY_PATH
-          value: oci://ghcr.io/vishal-chdhry/ivpol:sample
+          value: oci://ghcr.io/vishal-chdhry/ivpol:crit-vuln
         - name: POD_NAME
           valueFrom:
             fieldRef:
