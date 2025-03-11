@@ -1,0 +1,84 @@
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ImageVerificationPolicy
+metadata:
+  name: sample
+spec:
+  evaluation:
+    mode: JSON
+  imageRules:
+    - glob: ghcr.io/*
+  images:
+    - name: bar
+      expression: "[object.foo.bar]"
+  attestors:
+    - name: notary
+      notary:
+        certs: |-
+          -----BEGIN CERTIFICATE-----
+          MIIDTTCCAjWgAwIBAgIJAPI+zAzn4s0xMA0GCSqGSIb3DQEBCwUAMEwxCzAJBgNV
+          BAYTAlVTMQswCQYDVQQIDAJXQTEQMA4GA1UEBwwHU2VhdHRsZTEPMA0GA1UECgwG
+          Tm90YXJ5MQ0wCwYDVQQDDAR0ZXN0MB4XDTIzMDUyMjIxMTUxOFoXDTMzMDUxOTIx
+          MTUxOFowTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAldBMRAwDgYDVQQHDAdTZWF0
+          dGxlMQ8wDQYDVQQKDAZOb3RhcnkxDTALBgNVBAMMBHRlc3QwggEiMA0GCSqGSIb3
+          DQEBAQUAA4IBDwAwggEKAoIBAQDNhTwv+QMk7jEHufFfIFlBjn2NiJaYPgL4eBS+
+          b+o37ve5Zn9nzRppV6kGsa161r9s2KkLXmJrojNy6vo9a6g6RtZ3F6xKiWLUmbAL
+          hVTCfYw/2n7xNlVMjyyUpE+7e193PF8HfQrfDFxe2JnX5LHtGe+X9vdvo2l41R6m
+          Iia04DvpMdG4+da2tKPzXIuLUz/FDb6IODO3+qsqQLwEKmmUee+KX+3yw8I6G1y0
+          Vp0mnHfsfutlHeG8gazCDlzEsuD4QJ9BKeRf2Vrb0ywqNLkGCbcCWF2H5Q80Iq/f
+          ETVO9z88R7WheVdEjUB8UrY7ZMLdADM14IPhY2Y+tLaSzEVZAgMBAAGjMjAwMAkG
+          A1UdEwQCMAAwDgYDVR0PAQH/BAQDAgeAMBMGA1UdJQQMMAoGCCsGAQUFBwMDMA0G
+          CSqGSIb3DQEBCwUAA4IBAQBX7x4Ucre8AIUmXZ5PUK/zUBVOrZZzR1YE8w86J4X9
+          kYeTtlijf9i2LTZMfGuG0dEVFN4ae3CCpBst+ilhIndnoxTyzP+sNy4RCRQ2Y/k8
+          Zq235KIh7uucq96PL0qsF9s2RpTKXxyOGdtp9+HO0Ty5txJE2txtLDUIVPK5WNDF
+          ByCEQNhtHgN6V20b8KU2oLBZ9vyB8V010dQz0NRTDLhkcvJig00535/LUylECYAJ
+          5/jn6XKt6UYCQJbVNzBg/YPGc1RF4xdsGVDBben/JXpeGEmkdmXPILTKd9tZ5TC0
+          uOKpF5rWAruB5PCIrquamOejpXV9aQA/K2JQDuc0mcKz
+          -----END CERTIFICATE-----
+    - name: vulncertificate
+      notary:
+        certs: |-
+          -----BEGIN CERTIFICATE-----
+          MIIDmDCCAoCgAwIBAgIUCntgF4FftePAhEa6nZTsu/NMT3cwDQYJKoZIhvcNAQEL
+          BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAldBMRAwDgYDVQQHDAdTZWF0dGxl
+          MQ8wDQYDVQQKDAZOb3RhcnkxDTALBgNVBAMMBHRlc3QwHhcNMjQwNjEwMTYzMTQ2
+          WhcNMzQwNjA4MTYzMTQ2WjBMMQswCQYDVQQGEwJVUzELMAkGA1UECAwCV0ExEDAO
+          BgNVBAcMB1NlYXR0bGUxDzANBgNVBAoMBk5vdGFyeTENMAsGA1UEAwwEdGVzdDCC
+          ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJkEGqbILiWye6C1Jz+jwwDY
+          k/rovpXzxS+EQDvfj/YKvx37Kr4cjboJORu3wtzICWhPUtVWZ21ShfjerKgNq0iB
+          mrlF4cqz2KcOfuUT3XBglH/NwhEAqOrGPQrMsoQEFWgnilr0RTc+j4vDnkdkcTj2
+          K/qPhQHRAeb97TdvFCqcZfAGqiOVUqzDGxd2INz/fJd4/nYRX3LJBn9pUGxqRwZV
+          ElP5B/aCBjJDdh6tAElT5aDnLGAB+3+W2YwG342ELyAl2ILpbSRUpKLNAfKEd7Nj
+          1moIl4or5AIlTkgewZ/AK68HPFJEV3SwNbzkgAC+/mLVCD8tqu0o0ziyIUJtoQMC
+          AwEAAaNyMHAwHQYDVR0OBBYEFFTIzCppwv0vZnAVmETPm1CfMdcYMB8GA1UdIwQY
+          MBaAFFTIzCppwv0vZnAVmETPm1CfMdcYMAkGA1UdEwQCMAAwDgYDVR0PAQH/BAQD
+          AgeAMBMGA1UdJQQMMAoGCCsGAQUFBwMDMA0GCSqGSIb3DQEBCwUAA4IBAQB8/vfP
+          /TQ3X80JEZDsttdvd9NLm08bTJ/T+nh0DIiV10aHymQT9/u+iahfm1+7mj+uv8LS
+          Y63LepQCX5p9SoFzt513pbNYXMBbRrOKpth3DD49IPL2Gce86AFGydfrakd86CL1
+          9MhFeWhtRf0KndyUX8J2s7jbpoN8HrN4/wZygiEqbQWZG8YtIZ9EewmoVMYirQqH
+          EvW93NcgmjiELuhjndcT/kHjhf8fUAgSuxiPIy6ern02fJjw40KzgiKNvxMoI9su
+          G2zu6gXmxkw+x0SMe9kX+Rg4hCIjTUM7dc66XL5LcTp4S5YEZNVC40/FgTIZoK0e
+          r1dC2/Y1SmmrIoA1
+          -----END CERTIFICATE-----
+  attestations:
+    - name: sbom
+      referrer:
+        type: sbom/cyclone-dx
+    - name: vuln
+      referrer:
+        type: trivy/vulnerability
+  verifications:
+    - expression: >-
+        images.bar.map(image, verifyImageSignatures(image, [attestors.notary])).all(e, e > 0)
+      message: failed to verify image with notary cert
+    - expression: >-
+        images.bar.map(image, verifyAttestationSignatures(image, attestations.sbom, [attestors.notary])).all(e, e > 0)
+      message: failed to verify sbom with notary cert
+    - expression: >-
+        images.bar.map(image, verifyAttestationSignatures(image, attestations.vuln, [attestors.vulncertificate])).all(e, e > 0)
+      message: failed to verify sbom with notary cert
+    - expression: >-
+        images.bar.map(image, payload(image, attestations.vuln).Vulnerabilities.map(e, e.Severity).all(s, s != "HIGH" && s != "CRITICAL")).all(e, e)
+      message: the image has vulnerabilities of HIGH or CRITICAL severity
+    # - expression: >-
+    #     images.bar.map(image, payload(image, attestations.sbom)).all(e, e)
+    #   message: failed to verify sbom with notary cert
