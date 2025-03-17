@@ -31,7 +31,7 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, liste
 			http.Error(w, errors.Wrapf(err, "failed to decode").Error(), http.StatusNotAcceptable)
 			return
 		}
-		logger.Info("Request recieved", "data", requestData)
+		logger.Info("Request received", "data", requestData)
 
 		policies, err := policyFetcher()
 		if err != nil {
@@ -56,6 +56,11 @@ func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, liste
 
 		logger.Info("Sending response", "data", string(data))
 		w.WriteHeader(http.StatusOK)
-		w.Write(data)
+		_, err = w.Write(data)
+		if err != nil {
+			logger.Info("failed to write result", "error", err)
+			http.Error(w, errors.Wrapf(err, "failed to write result").Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }

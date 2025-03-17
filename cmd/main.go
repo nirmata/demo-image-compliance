@@ -37,9 +37,15 @@ func main() {
 	)
 
 	flag.BoolVar(&flagTLS, "notls", false, "Disable HTTPS")
-	flag.StringVar(&flagImagePullSecrets, "imagePullSecrets", "", "Secret resource names for image registry access credentials.")
-	flag.BoolVar(&flagAllowInsecureRegistry, "allowInsecureRegistry", false, "Whether to allow insecure connections to registries. Not recommended.")
-	flag.DurationVar(&reconcileDuration, "reconcileDuration", time.Hour, "Frequency of reconciling policy artifact")
+	flag.StringVar(
+		&flagImagePullSecrets, "imagePullSecrets", "",
+		"Secret resource names for image registry access credentials.")
+	flag.BoolVar(
+		&flagAllowInsecureRegistry, "allowInsecureRegistry", false,
+		"Whether to allow insecure connections to registries. Not recommended.")
+	flag.DurationVar(
+		&reconcileDuration, "reconcileDuration", time.Hour,
+		"Frequency of reconciling policy artifact")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -71,11 +77,18 @@ func main() {
 	}
 
 	caStopCh := make(chan struct{}, 1)
-	caInformer := certmanager.NewSecretInformer(kubeClient, certmanager.Namespace, tlsMgr.GenerateRootCASecretName(tlsMgrConfig), resyncPeriod)
+	caInformer := certmanager.NewSecretInformer(
+		kubeClient,
+		certmanager.Namespace,
+		tlsMgr.GenerateRootCASecretName(tlsMgrConfig),
+		resyncPeriod)
 	go caInformer.Informer().Run(caStopCh)
 
 	tlsStopCh := make(chan struct{}, 1)
-	tlsInformer := certmanager.NewSecretInformer(kubeClient, certmanager.Namespace, tlsMgr.GenerateTLSPairSecretName(tlsMgrConfig), resyncPeriod)
+	tlsInformer := certmanager.NewSecretInformer(kubeClient,
+		certmanager.Namespace,
+		tlsMgr.GenerateTLSPairSecretName(tlsMgrConfig),
+		resyncPeriod)
 	go tlsInformer.Informer().Run(tlsStopCh)
 
 	if err != nil {
@@ -133,7 +146,7 @@ func main() {
 }
 
 func Shutdown(zlogger *zap.Logger, caStopCh *chan struct{}, tlsStopCh *chan struct{}) {
-	zlogger.Sync()
+	_ = zlogger.Sync()
 	*caStopCh <- struct{}{}
 	*tlsStopCh <- struct{}{}
 }

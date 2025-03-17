@@ -16,7 +16,13 @@ import (
 	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func NewServer(logger logr.Logger, tlsDisabled bool, tlsInformer v1.SecretInformer, f policy.Fetcher, lister k8scorev1.SecretInterface, opts ...imagedataloader.Option) chan error {
+func NewServer(
+	logger logr.Logger,
+	tlsDisabled bool,
+	tlsInformer v1.SecretInformer,
+	f policy.Fetcher,
+	lister k8scorev1.SecretInterface,
+	opts ...imagedataloader.Option) chan error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/verifyimages", VerifyImagesHandler(logger, f, lister, opts...))
 
@@ -29,7 +35,9 @@ func NewServer(logger logr.Logger, tlsDisabled bool, tlsInformer v1.SecretInform
 
 		tlsConf := &tls.Config{
 			GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-				secret, err := tlsInformer.Lister().Secrets(certmanager.Namespace).Get(tlsMgr.GenerateTLSPairSecretName(tlsMgrConfig))
+				secret, err := tlsInformer.Lister().
+					Secrets(certmanager.Namespace).
+					Get(tlsMgr.GenerateTLSPairSecretName(tlsMgrConfig))
 				if err != nil {
 					return nil, err
 				} else if secret == nil {

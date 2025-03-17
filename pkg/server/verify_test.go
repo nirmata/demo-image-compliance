@@ -29,7 +29,7 @@ var (
 )
 
 func Test_Verify_Pass(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilites")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -41,7 +41,7 @@ func Test_Verify_Pass(t *testing.T) {
 }
 
 func Test_Verify_Fail(t *testing.T) {
-	w := verifyImage(t, unsignedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilites")
+	w := verifyImage(t, unsignedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -54,7 +54,7 @@ func Test_Verify_Fail(t *testing.T) {
 }
 
 func Test_Verify_Attestation_Fail(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-high-critical-vulnerabilites")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-high-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -83,7 +83,7 @@ func verifyImage(t *testing.T, image, policyImage string) *httptest.ResponseReco
 	return w
 }
 
-func verifyImageLocal(t *testing.T, image string) *httptest.ResponseRecorder {
+func VerifyImageLocal(t *testing.T, image string) *httptest.ResponseRecorder {
 	handler := VerifyImagesHandler(logr.Discard(), func() ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
 		return policy.Load("../../policies/critical.yaml")
 	}, nil)

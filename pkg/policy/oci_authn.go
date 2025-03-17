@@ -14,7 +14,11 @@ import (
 	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func RegistryOpts(lister k8scorev1.SecretInterface, insecure bool, secrets ...string) ([]remote.Option, []name.Option, error) {
+func RegistryOpts(lister k8scorev1.SecretInterface,
+	insecure bool,
+	secrets ...string) (
+	[]remote.Option,
+	[]name.Option, error) {
 	rOpts := make([]remote.Option, 0)
 	nOpts := make([]name.Option, 0)
 	keychains := make([]authn.Keychain, 0)
@@ -41,7 +45,9 @@ type autoRefreshSecrets struct {
 	imagePullSecrets []string
 }
 
-func NewAutoRefreshSecretsKeychain(lister k8scorev1.SecretInterface, imagePullSecrets ...string) (authn.Keychain, error) {
+func NewAutoRefreshSecretsKeychain(
+	lister k8scorev1.SecretInterface,
+	imagePullSecrets ...string) (authn.Keychain, error) {
 	return &autoRefreshSecrets{
 		lister:           lister,
 		imagePullSecrets: imagePullSecrets,
@@ -56,7 +62,10 @@ func (kc *autoRefreshSecrets) Resolve(resource authn.Resource) (authn.Authentica
 	return inner.Resolve(resource)
 }
 
-func generateKeychainForPullSecrets(ctx context.Context, lister k8scorev1.SecretInterface, imagePullSecrets ...string) (authn.Keychain, error) {
+func generateKeychainForPullSecrets(
+	ctx context.Context,
+	lister k8scorev1.SecretInterface,
+	imagePullSecrets ...string) (authn.Keychain, error) {
 	var secrets []corev1.Secret
 	for _, imagePullSecret := range imagePullSecrets {
 		secret, err := lister.Get(ctx, imagePullSecret, metav1.GetOptions{})

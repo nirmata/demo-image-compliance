@@ -13,7 +13,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func StartCertManager(logger logr.Logger, ctx context.Context, kubeClient kubernetes.Interface, caInformer v1.SecretInformer, tlsInformer v1.SecretInformer, tlsConfig *tlsMgr.Config) error {
+func StartCertManager(logger logr.Logger,
+	ctx context.Context,
+	kubeClient kubernetes.Interface,
+	caInformer v1.SecretInformer,
+	tlsInformer v1.SecretInformer,
+	tlsConfig *tlsMgr.Config) error {
 	tlsMgrConfig := &tlsMgr.Config{
 		ServiceName: ServiceName,
 		Namespace:   Namespace,
