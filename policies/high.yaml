@@ -9,7 +9,7 @@ spec:
     - glob: ghcr.io/*
   images:
     - name: imagerefs
-      expression: "[object.foo.imageReferences]"
+      expression: "[object.imageReferences.bar]"
   attestors:
     - name: notary
       notary:

@@ -120,10 +120,10 @@ ko-publish: $(KO) ## Build and publish the admission controller container image.
 .PHONY: publish-policies
 publish-policies:
 	@echo updating image verification policies... >&2
-	docker build -t $(REGISTRY)/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=critical.yaml ./policies
-	docker build -t $(REGISTRY)/nirmata/demo-image-compliance-policies:block-high-and-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=high.yaml ./policies
-	docker push $(REGISTRY)/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities
-	docker push $(REGISTRY)/nirmata/demo-image-compliance-policies:block-high-and-critical-vulnerabilities
+	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:block-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=critical.yaml ./policies
+	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:block-high-and-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=high.yaml ./policies
+	docker push $(REGISTRY)/nirmata/image-compliance-policies:block-critical-vulnerabilities
+	docker push $(REGISTRY)/nirmata/image-compliance-policies:block-high-and-critical-vulnerabilities
 
 ###########
 # CODEGEN #

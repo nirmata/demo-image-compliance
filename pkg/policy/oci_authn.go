@@ -2,11 +2,15 @@ package policy
 
 import (
 	"context"
+	"io"
 
+	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login"
 	"github.com/chrismellard/docker-credential-acr-env/pkg/credhelper"
 	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/authn/github"
 	kauth "github.com/google/go-containerregistry/pkg/authn/kubernetes"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/google"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -23,7 +27,13 @@ func RegistryOpts(lister k8scorev1.SecretInterface,
 	nOpts := make([]name.Option, 0)
 	keychains := make([]authn.Keychain, 0)
 
-	keychains = append(keychains, authn.NewKeychainFromHelper(credhelper.NewACRCredentialsHelper()))
+	keychains = append(keychains,
+		authn.NewKeychainFromHelper(credhelper.NewACRCredentialsHelper()),
+		google.Keychain,
+		authn.DefaultKeychain,
+		github.Keychain,
+		authn.NewKeychainFromHelper(ecr.NewECRHelper(ecr.WithLogger(io.Discard))),
+	)
 	if insecure {
 		nOpts = append(nOpts, name.Insecure)
 	}

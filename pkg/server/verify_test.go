@@ -29,7 +29,7 @@ var (
 )
 
 func Test_Verify_Pass(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -41,7 +41,7 @@ func Test_Verify_Pass(t *testing.T) {
 }
 
 func Test_Verify_Fail(t *testing.T) {
-	w := verifyImage(t, unsignedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilities")
+	w := verifyImage(t, unsignedImage, "ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -54,7 +54,7 @@ func Test_Verify_Fail(t *testing.T) {
 }
 
 func Test_Verify_Attestation_Fail(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/nirmata/demo-image-compliance-policies:block-high-critical-vulnerabilities")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/image-compliance-policies:block-high-and-critical-vulnerabilities")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult

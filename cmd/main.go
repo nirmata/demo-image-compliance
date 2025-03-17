@@ -128,7 +128,13 @@ func main() {
 		tlsInformer,
 		fetcher,
 		kubeClient.CoreV1().Secrets(certmanager.Namespace),
-		BuildRemoteOpts(secrets, []string{string(policiesv1alpha1.ACR)},
+		BuildRemoteOpts(secrets, []string{
+			string(policiesv1alpha1.ACR),
+			string(policiesv1alpha1.GCP),
+			string(policiesv1alpha1.AWS),
+			string(policiesv1alpha1.GHCR),
+			string(policiesv1alpha1.DEFAULT),
+		},
 			flagAllowInsecureRegistry)...,
 	)
 
