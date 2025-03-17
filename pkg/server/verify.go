@@ -15,7 +15,10 @@ import (
 	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func VerifyImagesHandler(logger logr.Logger, policyFetcher policy.Fetcher, lister k8scorev1.SecretInterface, opts ...imagedataloader.Option) func(w http.ResponseWriter, r *http.Request) {
+func VerifyImagesHandler(logger logr.Logger,
+	policyFetcher policy.Fetcher,
+	lister k8scorev1.SecretInterface,
+	opts ...imagedataloader.Option) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
