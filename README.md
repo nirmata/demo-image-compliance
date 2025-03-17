@@ -1,6 +1,6 @@
-# Image Verification Serivce
+# Policy-Based Image Compliance with Kyverno
 
-Verify any json payload against kyverno's image verification policies
+This is a demo to verify an image from a JSON payload using Kyverno 1.14's image verification policy type.
 
 ## Usage
 
