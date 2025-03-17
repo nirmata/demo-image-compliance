@@ -11,7 +11,7 @@ import (
 	"github.com/go-logr/logr"
 	policiesv1alpha1 "github.com/kyverno/kyverno/api/policies.kyverno.io/v1alpha1"
 	eval "github.com/kyverno/kyverno/pkg/imageverification/evaluator"
-	"github.com/nirmata/image-verification-service/pkg/policy"
+	"github.com/nirmata/image-compliance/pkg/policy"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +29,7 @@ var (
 )
 
 func Test_Verify_Pass(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/vishal-chdhry/ivpol:crit-vuln")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -41,7 +41,7 @@ func Test_Verify_Pass(t *testing.T) {
 }
 
 func Test_Verify_Fail(t *testing.T) {
-	w := verifyImage(t, unsignedImage, "ghcr.io/vishal-chdhry/ivpol:crit-vuln")
+	w := verifyImage(t, unsignedImage, "ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult
@@ -54,7 +54,7 @@ func Test_Verify_Fail(t *testing.T) {
 }
 
 func Test_Verify_Attestation_Fail(t *testing.T) {
-	w := verifyImage(t, signedImage, "ghcr.io/vishal-chdhry/ivpol:high-crit-vuln")
+	w := verifyImage(t, signedImage, "ghcr.io/nirmata/image-compliance-policies:block-high-critical-vulnerabilites")
 	assert.Equal(t, w.Code, http.StatusOK)
 
 	var result map[string]*eval.EvaluationResult

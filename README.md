@@ -4,51 +4,52 @@ Verify any json payload against kyverno's image verification policies
 
 ## Usage
 
-Create a kind cluster 
+Create a kind cluster:
 
 ```sh
-make kind-create
+kind create cluster --name=verify-images --image kindest/node:v1.32.0
 ```
 
-Install kyverno-image-verification-service
+Install `nirmata-image-compliance` in the namespace `nirmata`:
 
 ```sh
-make kind-install
+kubectl create ns nirmata
+kubectl apply -f "https://raw.githubusercontent.com/nirmata/image-compliance/refs/heads/main/config/install.yaml?token=GHSAT0AAAAAACV4PQQTQH22LE2NHDT2O27SZ6XXDDA"
 ```
 
-Start a netshoot pod
+Run port forwarding to send requests to the service:
 
 ```sh
-kubectl run netshoot --rm -i --tty --image nicolaka/netshoot
+kubectl -n nirmata port-forward svc/nirmata-image-compliance-svc 9443:443
 ```
 
-Post a request with signed image
+In a new shell, post a request with signed image:
 
 ```sh
-curl -k https://kyverno-image-verification-service-svc.kyverno-image-verification-service/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}'
+curl -k https://localhost:9443/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}'
 ```
 
 Post a request with unsigned image
 
 ```sh
-curl -k https://kyverno-image-verification-service-svc.kyverno-image-verification-service/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:unsigned"}}'
+curl -k https://localhost:9443/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:unsigned"}}'
 ```
 
-Update `POLICY_PATH` environment variable in deployment to: 
+Update `POLICY_PATH` environment variable in deployment to block critical & high vulnerabilities: 
 
 ```sh
-kubectl -n kyverno-image-verification-service edit deploy kyverno-image-verification-service
+kubectl -n nirmata edit deploy nirmata-image-compliance
 ```
 
 ```
 - name: POLICY_PATH
-  value: oci://ghcr.io/vishal-chdhry/ivpol:high-crit-vuln
+  value: oci://ghcr.io/nirmata/image-compliance-policies:block-high-vulnerabilites
 ```
 
 Post a request with signed image
 
 ```sh
-curl -k https://kyverno-image-verification-service-svc.kyverno-image-verification-service/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}'
+curl -k https://localhost:9443/verifyimages -X POST -d '{"foo":{"bar": "ghcr.io/kyverno/test-verify-image:signed"}}'
 ```
 
-This should fail now
+This should fail, as it does not comply with the policy requirements.

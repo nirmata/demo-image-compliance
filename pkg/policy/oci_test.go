@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var multilayeredImage = "ghcr.io/vishal-chdhry/ivpol:multilayered"
+var multilayeredImage = "ghcr.io/nirmata/image-compliance-policies:multilayered"
 
 func Test_OCIFetcherMultiLayered(t *testing.T) {
 	o, err := NewOCIPolicyFetcher(context.Background(), logr.Discard(), multilayeredImage, 0, nil, nil)

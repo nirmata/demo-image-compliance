@@ -1,23 +1,23 @@
 ---
-# Source: kyverno-image-verification-service/templates/serviceaccount.yaml
+# Source: nirmata-image-compliance/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: kyverno-image-verification-service
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance
+  namespace: nirmata
 ---
-# Source: kyverno-image-verification-service/templates/role.yaml
+# Source: nirmata-image-compliance/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: kyverno-image-verification-service-role
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance-role
+  namespace: nirmata
   labels:
-    app.kubernetes.io/instance: kyverno-image-verification-service
+    app.kubernetes.io/instance: nirmata-image-compliance
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/part-of: kyverno-image-verification-service
+    app.kubernetes.io/part-of: nirmata-image-compliance
     app.kubernetes.io/version: v0.1
-    helm.sh/chart: kyverno-image-verification-service-v0.1
+    helm.sh/chart: nirmata-image-compliance-v0.1
 rules:
   - apiGroups:
       - ""
@@ -43,33 +43,33 @@ rules:
       - update
       - delete
 ---
-# Source: kyverno-image-verification-service/templates/rolebinding.yaml
+# Source: nirmata-image-compliance/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: kyverno-image-verification-service-rolebinding
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance-rolebinding
+  namespace: nirmata
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: kyverno-image-verification-service-role
+  name: nirmata-image-compliance-role
 subjects:
 - kind: ServiceAccount
-  name: kyverno-image-verification-service
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance
+  namespace: nirmata
 ---
-# Source: kyverno-image-verification-service/templates/service.yaml
+# Source: nirmata-image-compliance/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: kyverno-image-verification-service-svc
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance-svc
+  namespace: nirmata
   labels:
-    app.kubernetes.io/instance: kyverno-image-verification-service
+    app.kubernetes.io/instance: nirmata-image-compliance
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/part-of: kyverno-image-verification-service
+    app.kubernetes.io/part-of: nirmata-image-compliance
     app.kubernetes.io/version: v0.1
-    helm.sh/chart: kyverno-image-verification-service-v0.1
+    helm.sh/chart: nirmata-image-compliance-v0.1
 spec:
   ports:
     - port: 443
@@ -77,21 +77,21 @@ spec:
       protocol: TCP
       targetPort: 9443
   selector:
-    app.kubernetes.io/part-of: kyverno-image-verification-service
-    app.kubernetes.io/instance: kyverno-image-verification-service
+    app.kubernetes.io/part-of: nirmata-image-compliance
+    app.kubernetes.io/instance: nirmata-image-compliance
 ---
-# Source: kyverno-image-verification-service/templates/deployment.yaml
+# Source: nirmata-image-compliance/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kyverno-image-verification-service
-  namespace: kyverno-image-verification-service
+  name: nirmata-image-compliance
+  namespace: nirmata
   labels:
-    app.kubernetes.io/instance: kyverno-image-verification-service
+    app.kubernetes.io/instance: nirmata-image-compliance
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/part-of: kyverno-image-verification-service
+    app.kubernetes.io/part-of: nirmata-image-compliance
     app.kubernetes.io/version: v0.1
-    helm.sh/chart: kyverno-image-verification-service-v0.1
+    helm.sh/chart: nirmata-image-compliance-v0.1
 spec:
   progressDeadlineSeconds: 600
   revisionHistoryLimit: 10
@@ -103,25 +103,25 @@ spec:
     type: RollingUpdate
   selector:
     matchLabels:
-      app.kubernetes.io/part-of: kyverno-image-verification-service
-      app.kubernetes.io/instance: kyverno-image-verification-service
+      app.kubernetes.io/part-of: nirmata-image-compliance
+      app.kubernetes.io/instance: nirmata-image-compliance
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: kyverno-image-verification-service
+        app.kubernetes.io/instance: nirmata-image-compliance
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/part-of: kyverno-image-verification-service
+        app.kubernetes.io/part-of: nirmata-image-compliance
         app.kubernetes.io/version: v0.1
-        helm.sh/chart: kyverno-image-verification-service-v0.1
+        helm.sh/chart: nirmata-image-compliance-v0.1
     spec:
       terminationGracePeriodSeconds: 5
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: kyverno-image-verification-service
+      serviceAccountName: nirmata-image-compliance
       containers:
-      - image: ghcr.io/nirmata/image-verification-service:latest
+      - image: ghcr.io/nirmata/image-compliance:latest
         imagePullPolicy: IfNotPresent
-        name: kyverno-image-verification-service
+        name: nirmata-image-compliance
         args:
           - --leader-elect=false
           - --notls=false
@@ -147,11 +147,11 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace  
         - name: SERVICE_NAME
-          value: kyverno-image-verification-service-svc
+          value: nirmata-image-compliance-svc
         - name: DEPLOYMENT_NAME
-          value: kyverno-image-verification-service
+          value: nirmata-image-compliance
         - name: POLICY_PATH
-          value: oci://ghcr.io/vishal-chdhry/ivpol:crit-vuln
+          value: oci://ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -161,5 +161,5 @@ spec:
             name: policies
       volumes:
         - image:
-            reference: ghcr.io/vishal-chdhry/ivpol:latest
+            reference: ghcr.io/nirmata/image-compliance-policies:latest
           name: policies

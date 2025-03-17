@@ -1,4 +1,4 @@
-module github.com/nirmata/image-verification-service
+module github.com/nirmata/image-compliance
 
 go 1.23.4
 

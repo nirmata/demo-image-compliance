@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kyverno-image-verification-service.name" . }}
-  namespace: {{ template "kyverno-image-verification-service.namespace" . }}
+  name: {{ template "nirmata-image-compliance.name" . }}
+  namespace: {{ template "nirmata-image-compliance.namespace" . }}
   labels:
-    {{- include "kyverno-image-verification-service.labels" . | nindent 4 }}
+    {{- include "nirmata-image-compliance.labels" . | nindent 4 }}
 spec:
   progressDeadlineSeconds: 600
   revisionHistoryLimit: 10
@@ -15,20 +15,20 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "kyverno-image-verification-service.matchLabels.common" . | nindent 6 }}
+      {{- include "nirmata-image-compliance.matchLabels.common" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "kyverno-image-verification-service.labels" . | nindent 8 }}
+        {{- include "nirmata-image-compliance.labels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: 5
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: {{ template "kyverno-image-verification-service.serviceAccountName" . }}
+      serviceAccountName: {{ template "nirmata-image-compliance.serviceAccountName" . }}
       containers:
       - image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        name: kyverno-image-verification-service
+        name: nirmata-image-compliance
         args:
           - --leader-elect={{ .Values.deployment.enableLeaderElection | default false }}
           - --notls={{ .Values.deployment.disableHTTPS | default false }}
@@ -57,9 +57,9 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace  
         - name: SERVICE_NAME
-          value: {{ template "kyverno-image-verification-service.serviceName" . }}
+          value: {{ template "nirmata-image-compliance.serviceName" . }}
         - name: DEPLOYMENT_NAME
-          value: {{ template "kyverno-image-verification-service.name" . }}
+          value: {{ template "nirmata-image-compliance.name" . }}
         - name: POLICY_PATH
           value: {{ .Values.policiesPath | default "/policies" }}
         - name: POD_NAME

@@ -1,0 +1,10 @@
+apiVersion: v2
+type: application
+name: nirmata-image-compliance
+version: v0.1
+appVersion: v0.1
+description: Nirmata image compliance service for Kyverno policy-based image verification
+keywords:
+  - kubernetes
+  - nirmata
+  - kyverno

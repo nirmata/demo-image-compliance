@@ -9,8 +9,8 @@ import (
 	"github.com/go-logr/logr"
 	eval "github.com/kyverno/kyverno/pkg/imageverification/evaluator"
 	"github.com/kyverno/kyverno/pkg/imageverification/imagedataloader"
-	"github.com/nirmata/image-verification-service/pkg/api"
-	"github.com/nirmata/image-verification-service/pkg/policy"
+	"github.com/nirmata/image-compliance/pkg/api"
+	"github.com/nirmata/image-compliance/pkg/policy"
 	"github.com/pkg/errors"
 	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )

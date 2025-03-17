@@ -7,14 +7,15 @@ fullnameOverride: ~
 # -- (string) Override the namespace the chart deploys to
 namespaceOverride: ~
 
-# -- (string) Path to image verification policies, can be a directory (ex: /policies) or an artifact (ex: oci://ghcr.io/vishal-chdhry/ivpol:latest )
-policiesPath: oci://ghcr.io/vishal-chdhry/ivpol:crit-vuln
+# -- (string) Path to image verification policies, can be a directory (ex: /policies) 
+# or an artifact (ex: oci://ghcr.io/nirmata/image-compliance-policies:latest )
+policiesPath: oci://ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites
 
 image:
   # -- (string) Image registry
   registry: ghcr.io
   # -- (string) Image repository
-  repository: nirmata/image-verification-service
+  repository: nirmata/image-compliance
   # -- (string) Image tag
   # Defaults to appVersion in Chart.yaml if omitted
   tag: ~
@@ -79,7 +80,7 @@ affinity: {}
 volumes:
   - name: policies
     image:
-      reference: ghcr.io/vishal-chdhry/ivpol:latest
+      reference: ghcr.io/nirmata/image-compliance-policies:latest
 
 # volume mounts for Deployment.
 volumeMounts:

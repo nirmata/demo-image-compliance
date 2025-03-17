@@ -5,20 +5,20 @@
 ##########
 
 ORG                                ?= nirmata
-PACKAGE                            ?= github.com/$(ORG)/image-verification-service
+PACKAGE                            ?= github.com/$(ORG)/image-compliance
 KIND_IMAGE                         ?= kindest/node:v1.32.0
-KIND_NAME                          ?= kind
+KIND_NAME                          ?= verify-images
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
-REPO                               ?= $(ORG)/image-verification-service
+REPO                               ?= $(ORG)/image-compliance
 LOCAL_PLATFORM                     := linux/$(GOARCH)
 KO_REGISTRY                        := ko.local
 KO_PLATFORMS                       := all
 KO_TAGS                            := $(GIT_SHA)
 KO_CACHE                           ?= /tmp/ko-cache
-CLI_BIN                            := image-verification-service
+CLI_BIN                            := image-compliance
 
 #########
 # TOOLS #
@@ -94,17 +94,35 @@ test-unit: ## Run tests
 # BUILD #
 #########
 
-LOCAL_PLATFORM      := linux/$(GOARCH)
-KO_DOCKER_REPO ?= ko.local
+LOCAL_PLATFORM := linux/$(GOARCH)
+KO_REPO_LOCAL ?= ko.local
 
-..PHONY: ko-build
+.PHONY: ko-build-local
+ko-build-local: $(KO) ## Build image (with ko)
+	@echo Build image with ko... >&2
+	KO_DOCKER_REPO=$(KO_REPO_LOCAL) $(KO) build --preserve-import-paths --tags=$(GIT_SHA) --platform=$(LOCAL_PLATFORM) ./cmd
+	
+.PHONY: ko-publish-local
+ko-publish-local: $(KO) ## Build and publish the admission controller container image.
+	KO_DOCKER_REPO=$(KO_REPO_LOCAL) $(KO) build --bare cmd/main.go
+
+KO_REPO ?= ghcr.io/$(ORG)/image-compliance
+
+.PHONY: ko-build
 ko-build: $(KO) ## Build image (with ko)
 	@echo Build image with ko... >&2
-	KO_DOCKER_REPO=$(KO_DOCKER_REPO) $(KO) build --preserve-import-paths --tags=$(GIT_SHA) --platform=$(LOCAL_PLATFORM) ./cmd
+	KO_DOCKER_REPO=$(KO_REPO) $(KO) build --preserve-import-paths --tags=$(GIT_SHA) --platform=$(LOCAL_PLATFORM) ./cmd
 	
 .PHONY: ko-publish
-ko-publish: ko ## Build and publish the admission controller container image.
-	KO_DOCKER_REPO=$(KO_DOCKER_REPO) $(KO) build --bare cmd/main.go
+ko-publish: $(KO) ## Build and publish the admission controller container image.
+	KO_DOCKER_REPO=$(KO_REPO) $(KO) build --bare cmd/main.go
+
+.PHONY: docker-push-policies
+publish-policies:
+	@echo updating image verification policies... >&2
+	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:latest -f ./policies/Dockerfile ./policies
+	docker push $(REGISTRY)/nirmata/image-compliance-policies:latest
+
 
 ###########
 # CODEGEN #
@@ -118,11 +136,6 @@ codegen-crds: ## fetch CRDs
 	@rm -rf $(CRDS_PATH)/*
 	@curl https://raw.githubusercontent.com/kyverno/kyverno/refs/heads/main/config/crds/policies.kyverno.io/policies.kyverno.io_imageverificationpolicies.yaml > $(CRDS_PATH)/policies.kyverno.io_imageverificationpolicies.yaml
 
-.PHONY: codegen-policies
-codegen-policies:
-	@echo updating image verification crds... >&2
-	docker build -t $(REGISTRY)/vishal-chdhry/ivpol:latest -f ./policies/Dockerfile ./policies
-	docker push $(REGISTRY)/vishal-chdhry/ivpol:latest
 
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
@@ -131,7 +144,7 @@ codegen-helm-docs: ## Generate helm docs
 
 .PHONY: codegen-manifest-install
 codegen-manifest-install: ## Generate install manifest
-	$(HELM) template kyverno-image-verification-service --namespace kyverno-image-verification-service charts/image-verification-service \
+	$(HELM) template nirmata-image-compliance --namespace nirmata charts/image-compliance \
 	--set image.tag=latest \
 	> config/install.yaml
 
@@ -168,8 +181,8 @@ kind-load: $(KIND) ko-build ## Build image and load in kind cluster
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
-	@$(HELM) upgrade --install kyverno-image-verification-service --namespace kyverno-image-verification-service \
-		--create-namespace --wait ./charts/image-verification-service \
+	@$(HELM) upgrade --install nirmata-image-compliance --namespace nirmata \
+		--create-namespace --wait ./charts/image-compliance \
 		--set image.registry=$(KO_DOCKER_REPO) \
 		--set image.repository=$(PACKAGE)/cmd \
 		--set image.tag=$(GIT_SHA)
