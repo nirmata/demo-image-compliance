@@ -7,12 +7,12 @@ permissions: {}
 on:
   push:
     branches:
-      - 'main'
-      - 'release*'
+      - "main"
+      - "release*"
   pull_request:
     branches:
-      - 'main'
-      - 'release*'
+      - "main"
+      - "release*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,9 +32,8 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea # v3.7.1
+        uses: golangci/golangci-lint-action@4696ba8babb6127d732c3c6dde519db15edab9ea
         with:
-          version: v1.54.2
           skip-cache: true
       - name: go fmt check
         run: make fmt
