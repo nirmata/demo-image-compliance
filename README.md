@@ -14,7 +14,7 @@ Install `nirmata-image-compliance` in the namespace `nirmata`:
 
 ```sh
 kubectl create ns nirmata
-kubectl apply -f "https://raw.githubusercontent.com/nirmata/demo-image-compliance/refs/heads/main/config/install.yaml?token=GHSAT0AAAAAACV4PQQTINHNS7CALLAPLPBAZ6XY5CA"
+kubectl apply -f "https://raw.githubusercontent.com/nirmata/demo-image-compliance/refs/heads/main/config/install.yaml"
 ```
 
 Run port forwarding to send requests to the service:
