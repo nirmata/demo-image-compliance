@@ -14,7 +14,11 @@ import (
 
 type Fetcher func() ([]*policiesv1alpha1.ImageVerificationPolicy, error)
 
-func PolicyFetcher(ctx context.Context, logger logr.Logger, reconcileDuration time.Duration, rOpts []remote.Option, nOpts []name.Option) (Fetcher, error) {
+func PolicyFetcher(ctx context.Context,
+	logger logr.Logger,
+	reconcileDuration time.Duration,
+	rOpts []remote.Option,
+	nOpts []name.Option) (Fetcher, error) {
 	policiesPath := os.Getenv("POLICY_PATH")
 	if len(policiesPath) == 0 {
 		policiesPath = "/policies"

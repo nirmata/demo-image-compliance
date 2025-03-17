@@ -2,11 +2,15 @@ package policy
 
 import (
 	"context"
+	"io"
 
+	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login"
 	"github.com/chrismellard/docker-credential-acr-env/pkg/credhelper"
 	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/authn/github"
 	kauth "github.com/google/go-containerregistry/pkg/authn/kubernetes"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/google"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,12 +18,22 @@ import (
 	k8scorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-func RegistryOpts(lister k8scorev1.SecretInterface, insecure bool, secrets ...string) ([]remote.Option, []name.Option, error) {
+func RegistryOpts(lister k8scorev1.SecretInterface,
+	insecure bool,
+	secrets ...string) (
+	[]remote.Option,
+	[]name.Option, error) {
 	rOpts := make([]remote.Option, 0)
 	nOpts := make([]name.Option, 0)
 	keychains := make([]authn.Keychain, 0)
 
-	keychains = append(keychains, authn.NewKeychainFromHelper(credhelper.NewACRCredentialsHelper()))
+	keychains = append(keychains,
+		authn.NewKeychainFromHelper(credhelper.NewACRCredentialsHelper()),
+		google.Keychain,
+		authn.DefaultKeychain,
+		github.Keychain,
+		authn.NewKeychainFromHelper(ecr.NewECRHelper(ecr.WithLogger(io.Discard))),
+	)
 	if insecure {
 		nOpts = append(nOpts, name.Insecure)
 	}
@@ -41,7 +55,9 @@ type autoRefreshSecrets struct {
 	imagePullSecrets []string
 }
 
-func NewAutoRefreshSecretsKeychain(lister k8scorev1.SecretInterface, imagePullSecrets ...string) (authn.Keychain, error) {
+func NewAutoRefreshSecretsKeychain(
+	lister k8scorev1.SecretInterface,
+	imagePullSecrets ...string) (authn.Keychain, error) {
 	return &autoRefreshSecrets{
 		lister:           lister,
 		imagePullSecrets: imagePullSecrets,
@@ -56,7 +72,10 @@ func (kc *autoRefreshSecrets) Resolve(resource authn.Resource) (authn.Authentica
 	return inner.Resolve(resource)
 }
 
-func generateKeychainForPullSecrets(ctx context.Context, lister k8scorev1.SecretInterface, imagePullSecrets ...string) (authn.Keychain, error) {
+func generateKeychainForPullSecrets(
+	ctx context.Context,
+	lister k8scorev1.SecretInterface,
+	imagePullSecrets ...string) (authn.Keychain, error) {
 	var secrets []corev1.Secret
 	for _, imagePullSecret := range imagePullSecrets {
 		secret, err := lister.Get(ctx, imagePullSecret, metav1.GetOptions{})

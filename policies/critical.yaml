@@ -7,9 +7,10 @@ spec:
     mode: JSON
   imageRules:
     - glob: ghcr.io/*
+  # images is the path to the images in the JSON object
   images:
-    - name: bar
-      expression: "[object.foo.bar]"
+    - name: imagerefs
+      expression: "[object.imageReferences.bar]"
   attestors:
     - name: notary
       notary:
@@ -68,17 +69,17 @@ spec:
         type: trivy/vulnerability
   verifications:
     - expression: >-
-        images.bar.map(image, verifyImageSignatures(image, [attestors.notary])).all(e, e > 0)
+        images.imagerefs.map(image, verifyImageSignatures(image, [attestors.notary])).all(e, e > 0)
       message: failed to verify image with notary cert
     - expression: >-
-        images.bar.map(image, verifyAttestationSignatures(image, attestations.sbom, [attestors.notary])).all(e, e > 0)
+        images.imagerefs.map(image, verifyAttestationSignatures(image, attestations.sbom, [attestors.notary])).all(e, e > 0)
       message: failed to verify sbom with notary cert
     - expression: >-
-        images.bar.map(image, verifyAttestationSignatures(image, attestations.vuln, [attestors.vulncertificate])).all(e, e > 0)
+        images.imagerefs.map(image, verifyAttestationSignatures(image, attestations.vuln, [attestors.vulncertificate])).all(e, e > 0)
       message: failed to verify sbom with notary cert
     - expression: >-
-        images.bar.map(image, payload(image, attestations.vuln).Vulnerabilities.map(e, e.Severity).all(s, s != "CRITICAL")).all(e, e)
-      message: the image has vulnerabilities of HIGH or CRITICAL severity
+        images.imagerefs.map(image, payload(image, attestations.vuln).Vulnerabilities.map(e, e.Severity).all(s, s != "CRITICAL")).all(e, e)
+      message: the image has vulnerabilities of CRITICAL severity
     # - expression: >-
-    #     images.bar.map(image, payload(image, attestations.sbom)).all(e, e)
+    #     images.imagerefs.map(image, payload(image, attestations.sbom)).all(e, e)
     #   message: failed to verify sbom with notary cert

@@ -89,7 +89,7 @@ test-clean: ## Clean tests cache
 .PHONY: test-unit
 test-unit: ## Run tests
 	@echo Running tests... >&2
-	@go test ./... -race -coverprofile=coverage.out
+	@go test ./... -race -coverprofile=coverage.out -v
 
 # BUILD #
 #########
@@ -120,9 +120,10 @@ ko-publish: $(KO) ## Build and publish the admission controller container image.
 .PHONY: publish-policies
 publish-policies:
 	@echo updating image verification policies... >&2
-	docker build -t $(REGISTRY)/nirmata/demo-image-compliance-policies:latest -f ./policies/Dockerfile ./policies
-	docker push $(REGISTRY)/nirmata/demo-image-compliance-policies:latest
-
+	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:block-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=critical.yaml ./policies
+	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:block-high-and-critical-vulnerabilities -f ./policies/Dockerfile --build-arg POLICY_EXPRESSION=high.yaml ./policies
+	docker push $(REGISTRY)/nirmata/image-compliance-policies:block-critical-vulnerabilities
+	docker push $(REGISTRY)/nirmata/image-compliance-policies:block-high-and-critical-vulnerabilities
 
 ###########
 # CODEGEN #

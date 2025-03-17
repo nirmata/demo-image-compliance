@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
 		wantErr bool
 	}{{
 		name:    "sample",
-		path:    filepath.Join(basePath, "sample.yaml"),
+		path:    filepath.Join(basePath, "critical.yaml"),
 		wantErr: false,
 	}}
 	for _, tt := range tests {

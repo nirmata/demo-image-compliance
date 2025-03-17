@@ -17,7 +17,12 @@ import (
 	policiesv1alpha1 "github.com/kyverno/kyverno/api/policies.kyverno.io/v1alpha1"
 )
 
-func NewOCIPolicyFetcher(ctx context.Context, logger logr.Logger, artifact string, reconcileDuration time.Duration, rOpts []remote.Option, nOpts []name.Option) (*ociPolicyFetcher, error) {
+func NewOCIPolicyFetcher(ctx context.Context,
+	logger logr.Logger,
+	artifact string,
+	reconcileDuration time.Duration,
+	rOpts []remote.Option,
+	nOpts []name.Option) (*ociPolicyFetcher, error) {
 	var ticker *time.Ticker
 	if reconcileDuration != 0 {
 		ticker = time.NewTicker(reconcileDuration)
@@ -43,7 +48,7 @@ func NewOCIPolicyFetcher(ctx context.Context, logger logr.Logger, artifact strin
 }
 
 type ociPolicyFetcher struct {
-	sync.RWMutex
+	mu       sync.RWMutex
 	logger   logr.Logger
 	artifact string
 	ticker   *time.Ticker
@@ -53,8 +58,8 @@ type ociPolicyFetcher struct {
 }
 
 func (o *ociPolicyFetcher) Fetch() ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
-	o.RLock()
-	defer o.RUnlock()
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
 	return o.ivpols, nil
 }
@@ -75,15 +80,17 @@ func (o *ociPolicyFetcher) Reconcile(ctx context.Context) {
 					o.logger.Error(err, "failed to reconcile policies", "artifact", o.artifact)
 				}
 				o.logger.Info("reconciled policies", "artifact", o.artifact, "policies", len(policies))
-				o.Lock()
+				o.mu.Lock()
 				o.ivpols = policies
-				o.Unlock()
+				o.mu.Unlock()
 			}
 		}
 	}()
 }
 
-func fetchPoliciesFromArtifact(image string, rOpts []remote.Option, nOpts []name.Option) ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
+func fetchPoliciesFromArtifact(image string,
+	rOpts []remote.Option,
+	nOpts []name.Option) ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
 	policies := make([]*policiesv1alpha1.ImageVerificationPolicy, 0)
 	ref, err := name.ParseReference(image, nOpts...)
 	if err != nil {
@@ -105,7 +112,11 @@ func fetchPoliciesFromArtifact(image string, rOpts []remote.Option, nOpts []name
 		name := header.Name
 		if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
 			var buf bytes.Buffer
-			buf.ReadFrom(tr)
+			_, err := buf.ReadFrom(tr)
+			if err != nil {
+				return nil, err
+			}
+
 			p, err := Parse(buf.Bytes())
 			if err != nil {
 				return nil, err
