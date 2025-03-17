@@ -1,5 +1,5 @@
 {
-  "foo": {
+  "imageReferences": {
     "bar": "ghcr.io/kyverno/test-verify-image:unsigned"
   }
 }

@@ -18,7 +18,7 @@ import (
 var (
 	obj = func(image string) map[string]any {
 		return map[string]any{
-			"foo": map[string]string{
+			"imageReferences": map[string]string{
 				"bar": image,
 			},
 		}
@@ -85,7 +85,7 @@ func verifyImage(t *testing.T, image, policyImage string) *httptest.ResponseReco
 
 func verifyImageLocal(t *testing.T, image string) *httptest.ResponseRecorder {
 	handler := VerifyImagesHandler(logr.Discard(), func() ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
-		return policy.Load("../../policies/sample.yaml")
+		return policy.Load("../../policies/critical.yaml")
 	}, nil)
 	data, err := json.Marshal(obj(image))
 	assert.NoError(t, err)

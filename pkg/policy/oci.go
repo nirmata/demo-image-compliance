@@ -43,7 +43,7 @@ func NewOCIPolicyFetcher(ctx context.Context, logger logr.Logger, artifact strin
 }
 
 type ociPolicyFetcher struct {
-	sync.RWMutex
+	mu       sync.RWMutex
 	logger   logr.Logger
 	artifact string
 	ticker   *time.Ticker
@@ -53,8 +53,8 @@ type ociPolicyFetcher struct {
 }
 
 func (o *ociPolicyFetcher) Fetch() ([]*policiesv1alpha1.ImageVerificationPolicy, error) {
-	o.RLock()
-	defer o.RUnlock()
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
 	return o.ivpols, nil
 }
@@ -75,9 +75,9 @@ func (o *ociPolicyFetcher) Reconcile(ctx context.Context) {
 					o.logger.Error(err, "failed to reconcile policies", "artifact", o.artifact)
 				}
 				o.logger.Info("reconciled policies", "artifact", o.artifact, "policies", len(policies))
-				o.Lock()
+				o.mu.Lock()
 				o.ivpols = policies
-				o.Unlock()
+				o.mu.Unlock()
 			}
 		}
 	}()

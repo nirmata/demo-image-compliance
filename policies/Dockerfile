@@ -1,4 +1,6 @@
 FROM scratch
 
+ARG POLICY_EXPRESSION
+
 WORKDIR /
-COPY ./*.yaml ./
+COPY ./${POLICY_EXPRESSION} ./

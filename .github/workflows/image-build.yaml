@@ -5,7 +5,7 @@ permissions: {}
 on:
   push:
     branches:
-      - '*'
+      - "*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
       - name: Setup build env
         uses: ./.github/actions/setup-build-env
         with:
@@ -32,8 +34,8 @@ jobs:
       - name: Trivy Scan Image
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
