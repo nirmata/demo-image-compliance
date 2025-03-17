@@ -18,16 +18,16 @@ runs:
         git fetch --prune --unshallow
     - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # v3.5.0
       with:
-        go-version: ~1.22.2
-    - uses: actions/cache@4723a57e26efda3a62cbde1812113b730952852d # v3.2.2
+        go-version: ~1.24.1
+    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-pkg-mod-${{ hashFiles('**/go.sum') }}-${{ hashFiles('Makefile') }}
-    - uses: actions/cache@4723a57e26efda3a62cbde1812113b730952852d # v3.2.2
+    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       with:
         path: ~/.cache/kyverno/tools
         key: ${{ runner.os }}-cache-kyverno-tools-${{ hashFiles('**/go.sum') }}-${{ hashFiles('Makefile') }}
-    - uses: actions/cache@4723a57e26efda3a62cbde1812113b730952852d # v3.2.2
+    - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
       if: ${{ inputs.build-cache-key }}
       with:
         path: ~/.cache/go-build
