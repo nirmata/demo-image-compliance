@@ -89,7 +89,7 @@ test-clean: ## Clean tests cache
 .PHONY: test-unit
 test-unit: ## Run tests
 	@echo Running tests... >&2
-	@go test ./... -race -coverprofile=coverage.out
+	@go test ./... -race -coverprofile=coverage.out -v
 
 # BUILD #
 #########
