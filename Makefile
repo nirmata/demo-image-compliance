@@ -94,8 +94,12 @@ test-unit: ## Run tests
 # BUILD #
 #########
 
+REGISTRY_USERNAME   ?= dummy
 LOCAL_PLATFORM := linux/$(GOARCH)
 KO_REPO_LOCAL ?= ko.local
+
+ko-login: $(KO)
+	@$(KO) login $(REGISTRY) --username $(REGISTRY_USERNAME) --password $(REGISTRY_PASSWORD)
 
 .PHONY: ko-build-local
 ko-build-local: $(KO) ## Build image (with ko)
@@ -109,12 +113,12 @@ ko-publish-local: $(KO) ## Build and publish the admission controller container 
 KO_REPO ?= ghcr.io/$(ORG)/demo-image-compliance
 
 .PHONY: ko-build
-ko-build: $(KO) ## Build image (with ko)
+ko-build: $(KO) ko-login ## Build image (with ko)
 	@echo Build image with ko... >&2
 	KO_DOCKER_REPO=$(KO_REPO) $(KO) build --preserve-import-paths --tags=$(GIT_SHA) --platform=$(LOCAL_PLATFORM) ./cmd
 	
 .PHONY: ko-publish
-ko-publish: $(KO) ## Build and publish the admission controller container image.
+ko-publish: $(KO) ko-login ## Build and publish the admission controller container image.
 	KO_DOCKER_REPO=$(KO_REPO) $(KO) build --bare cmd/main.go
 
 .PHONY: publish-policies
