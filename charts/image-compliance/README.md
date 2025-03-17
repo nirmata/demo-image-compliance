@@ -11,9 +11,9 @@ Nirmata image compliance service for Kyverno policy-based image verification
 | nameOverride | string | `nil` | Override the name of the chart |
 | fullnameOverride | string | `nil` | Override the expanded name of the chart |
 | namespaceOverride | string | `nil` | Override the namespace the chart deploys to |
-| policiesPath | string | `"oci://ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites"` | Path to image verification policies, can be a directory (ex: /policies)  or an artifact (ex: oci://ghcr.io/nirmata/image-compliance-policies:latest ) |
+| policiesPath | string | `"oci://ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilites"` | Path to image verification policies, can be a directory (ex: /policies)  or an artifact (ex: oci://ghcr.io/nirmata/demo-image-compliance-policies:latest ) |
 | image.registry | string | `"ghcr.io"` | Image registry |
-| image.repository | string | `"nirmata/image-compliance"` | Image repository |
+| image.repository | string | `"nirmata/demo-image-compliance"` | Image repository |
 | image.tag | string | `nil` | Image tag Defaults to appVersion in Chart.yaml if omitted |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | deployment.updateStrategy | object | See [values.yaml](values.yaml) | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
@@ -28,7 +28,7 @@ Nirmata image compliance service for Kyverno policy-based image verification
 | tolerations | list | `[]` |  |
 | affinity | object | `{}` |  |
 | volumes[0].name | string | `"policies"` |  |
-| volumes[0].image.reference | string | `"ghcr.io/nirmata/image-compliance-policies:latest"` |  |
+| volumes[0].image.reference | string | `"ghcr.io/nirmata/demo-image-compliance-policies:latest"` |  |
 | volumeMounts[0].name | string | `"policies"` |  |
 | volumeMounts[0].mountPath | string | `"/policies"` |  |
 

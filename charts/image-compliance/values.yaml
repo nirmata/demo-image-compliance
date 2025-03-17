@@ -8,14 +8,14 @@ fullnameOverride: ~
 namespaceOverride: ~
 
 # -- (string) Path to image verification policies, can be a directory (ex: /policies) 
-# or an artifact (ex: oci://ghcr.io/nirmata/image-compliance-policies:latest )
-policiesPath: oci://ghcr.io/nirmata/image-compliance-policies:block-critical-vulnerabilites
+# or an artifact (ex: oci://ghcr.io/nirmata/demo-image-compliance-policies:latest )
+policiesPath: oci://ghcr.io/nirmata/demo-image-compliance-policies:block-critical-vulnerabilites
 
 image:
   # -- (string) Image registry
   registry: ghcr.io
   # -- (string) Image repository
-  repository: nirmata/image-compliance
+  repository: nirmata/demo-image-compliance
   # -- (string) Image tag
   # Defaults to appVersion in Chart.yaml if omitted
   tag: ~
@@ -80,7 +80,7 @@ affinity: {}
 volumes:
   - name: policies
     image:
-      reference: ghcr.io/nirmata/image-compliance-policies:latest
+      reference: ghcr.io/nirmata/demo-image-compliance-policies:latest
 
 # volume mounts for Deployment.
 volumeMounts:

@@ -7,7 +7,7 @@ import (
 	"github.com/kyverno/pkg/ext/resource/convert"
 	"github.com/kyverno/pkg/ext/resource/loader"
 	yamlutils "github.com/kyverno/pkg/ext/yaml"
-	"github.com/nirmata/image-compliance/pkg/data"
+	"github.com/nirmata/demo-image-compliance/pkg/data"
 	"sigs.k8s.io/kubectl-validate/pkg/openapiclient"
 )
 

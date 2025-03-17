@@ -14,7 +14,7 @@ Install `nirmata-image-compliance` in the namespace `nirmata`:
 
 ```sh
 kubectl create ns nirmata
-kubectl apply -f "https://raw.githubusercontent.com/nirmata/image-compliance/refs/heads/main/config/install.yaml?token=GHSAT0AAAAAACV4PQQTQH22LE2NHDT2O27SZ6XXDDA"
+kubectl apply -f "https://raw.githubusercontent.com/nirmata/demo-image-compliance/refs/heads/main/config/install.yaml?token=GHSAT0AAAAAACV4PQQTQH22LE2NHDT2O27SZ6XXDDA"
 ```
 
 Run port forwarding to send requests to the service:
@@ -43,7 +43,7 @@ kubectl -n nirmata edit deploy nirmata-image-compliance
 
 ```
 - name: POLICY_PATH
-  value: oci://ghcr.io/nirmata/image-compliance-policies:block-high-vulnerabilites
+  value: oci://ghcr.io/nirmata/demo-image-compliance-policies:block-high-vulnerabilites
 ```
 
 Post a request with signed image

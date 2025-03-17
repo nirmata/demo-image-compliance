@@ -5,14 +5,14 @@
 ##########
 
 ORG                                ?= nirmata
-PACKAGE                            ?= github.com/$(ORG)/image-compliance
+PACKAGE                            ?= github.com/$(ORG)/demo-image-compliance
 KIND_IMAGE                         ?= kindest/node:v1.32.0
 KIND_NAME                          ?= verify-images
 GIT_SHA                            := $(shell git rev-parse HEAD)
 GOOS                               ?= $(shell go env GOOS)
 GOARCH                             ?= $(shell go env GOARCH)
 REGISTRY                           ?= ghcr.io
-REPO                               ?= $(ORG)/image-compliance
+REPO                               ?= $(ORG)/demo-image-compliance
 LOCAL_PLATFORM                     := linux/$(GOARCH)
 KO_REGISTRY                        := ko.local
 KO_PLATFORMS                       := all
@@ -106,7 +106,7 @@ ko-build-local: $(KO) ## Build image (with ko)
 ko-publish-local: $(KO) ## Build and publish the admission controller container image.
 	KO_DOCKER_REPO=$(KO_REPO_LOCAL) $(KO) build --bare cmd/main.go
 
-KO_REPO ?= ghcr.io/$(ORG)/image-compliance
+KO_REPO ?= ghcr.io/$(ORG)/demo-image-compliance
 
 .PHONY: ko-build
 ko-build: $(KO) ## Build image (with ko)
@@ -117,11 +117,11 @@ ko-build: $(KO) ## Build image (with ko)
 ko-publish: $(KO) ## Build and publish the admission controller container image.
 	KO_DOCKER_REPO=$(KO_REPO) $(KO) build --bare cmd/main.go
 
-.PHONY: docker-push-policies
+.PHONY: publish-policies
 publish-policies:
 	@echo updating image verification policies... >&2
-	docker build -t $(REGISTRY)/nirmata/image-compliance-policies:latest -f ./policies/Dockerfile ./policies
-	docker push $(REGISTRY)/nirmata/image-compliance-policies:latest
+	docker build -t $(REGISTRY)/nirmata/demo-image-compliance-policies:latest -f ./policies/Dockerfile ./policies
+	docker push $(REGISTRY)/nirmata/demo-image-compliance-policies:latest
 
 
 ###########
@@ -174,16 +174,16 @@ kind-delete: $(KIND) ## Delete kind cluster
 	@$(KIND) delete cluster --name $(KIND_NAME)
 
 .PHONY: kind-load
-kind-load: $(KIND) ko-build ## Build image and load in kind cluster
+kind-load: $(KIND) ko-build-local ## Build image and load in kind cluster
 	@echo Load image... >&2
-	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_DOCKER_REPO)/$(PACKAGE)/cmd:$(GIT_SHA)
+	@$(KIND) load docker-image --name $(KIND_NAME) $(KO_REPO_LOCAL)/$(PACKAGE)/cmd:$(GIT_SHA)
 
 .PHONY: kind-install
 kind-install: $(HELM) kind-load ## Build image, load it in kind cluster and deploy helm chart
 	@echo Install chart... >&2
 	@$(HELM) upgrade --install nirmata-image-compliance --namespace nirmata \
 		--create-namespace --wait ./charts/image-compliance \
-		--set image.registry=$(KO_DOCKER_REPO) \
+		--set image.registry=$(KO_REPO_LOCAL) \
 		--set image.repository=$(PACKAGE)/cmd \
 		--set image.tag=$(GIT_SHA)
 

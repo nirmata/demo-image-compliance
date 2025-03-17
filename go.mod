@@ -1,4 +1,4 @@
-module github.com/nirmata/image-compliance
+module github.com/nirmata/demo-image-compliance
 
 go 1.23.4
 
