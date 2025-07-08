@@ -16,11 +16,9 @@ import (
 )
 
 var (
-	obj = func(image string) map[string]any {
-		return map[string]any{
-			"imageReferences": map[string]string{
-				"bar": image,
-			},
+	obj = func(image string) map[string]string {
+		return map[string]string{
+			"imageReference": image,
 		}
 	}
 
