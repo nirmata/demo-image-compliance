@@ -10,7 +10,7 @@ spec:
   # images is the path to the images in the JSON object
   images:
     - name: imagerefs
-      expression: "[object.imageReferences.bar]"
+      expression: "[object.imageReference]"
   attestors:
     - name: notary
       notary:
