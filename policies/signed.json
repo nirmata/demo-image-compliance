@@ -1,5 +1,3 @@
 {
-  "imageReferences":{
-    "bar": "ghcr.io/kyverno/test-verify-image:signed"
-  }
+  "imageReference": "ghcr.io/kyverno/test-verify-image:signed"
 }
