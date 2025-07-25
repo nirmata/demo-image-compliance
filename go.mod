@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/zapr v1.3.0
 	github.com/google/go-containerregistry v0.20.6
 	github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20250225234217-098045d5e61f
-	github.com/kyverno/kyverno v1.15.0-rc.1
+	github.com/kyverno/kyverno v1.15.0-rc.3
 	github.com/kyverno/pkg/certmanager v0.0.10
 	github.com/kyverno/pkg/ext v0.0.0-20240418121121-df8add26c55c
 	github.com/kyverno/pkg/tls v0.0.9
